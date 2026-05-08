@@ -4,14 +4,15 @@ Heart Disease UCI Dataset - MLOps Assignment
 BITS Pilani MTech (AMLCSZG523)
 """
 
-import pandas as pd
+import os
+import pickle
+
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+import pandas as pd
+from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-import pickle
-import os
+from sklearn.preprocessing import StandardScaler
 
 COLUMN_NAMES = [
     "age", "sex", "cp", "trestbps", "chol",

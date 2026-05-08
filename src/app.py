@@ -9,18 +9,16 @@ Endpoints:
   POST /predict  → heart disease prediction
 """
 
-import os
-import sys
-import pickle
 import logging
+import os
+import pickle
 import time
-from typing import Optional
 
+import numpy as np
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, validator
-import numpy as np
+from pydantic import BaseModel, Field
 
 # Configure logging
 logging.basicConfig(
@@ -81,16 +79,38 @@ class PatientFeatures(BaseModel):
     age: float = Field(..., ge=1, le=120, description="Age in years", example=54.0)
     sex: float = Field(..., ge=0, le=1, description="Sex (1=Male, 0=Female)", example=1.0)
     cp: float = Field(..., ge=1, le=4, description="Chest pain type (1-4)", example=2.0)
-    trestbps: float = Field(..., ge=50, le=300, description="Resting blood pressure (mmHg)", example=130.0)
-    chol: float = Field(..., ge=100, le=600, description="Serum cholesterol (mg/dl)", example=250.0)
-    fbs: float = Field(..., ge=0, le=1, description="Fasting blood sugar > 120 mg/dl (1=True)", example=0.0)
+    trestbps: float = Field(
+        ..., ge=50, le=300, description="Resting blood pressure (mmHg)", example=130.0
+    )
+    chol: float = Field(
+        ..., ge=100, le=600, description="Serum cholesterol (mg/dl)", example=250.0
+    )
+    fbs: float = Field(
+        ..., ge=0, le=1, description="Fasting blood sugar > 120 mg/dl (1=True)", example=0.0
+    )
     restecg: float = Field(..., ge=0, le=2, description="Resting ECG (0-2)", example=0.0)
-    thalach: float = Field(..., ge=60, le=250, description="Max heart rate achieved", example=150.0)
-    exang: float = Field(..., ge=0, le=1, description="Exercise induced angina (1=Yes)", example=0.0)
-    oldpeak: float = Field(..., ge=0.0, le=10.0, description="ST depression induced by exercise", example=1.5)
-    slope: float = Field(..., ge=1, le=3, description="Slope of peak exercise ST (1-3)", example=2.0)
-    ca: float = Field(..., ge=0, le=3, description="Number of major vessels (0-3)", example=0.0)
-    thal: float = Field(..., ge=3, le=7, description="Thalassemia (3=normal, 6=fixed defect, 7=reversable)", example=3.0)
+    thalach: float = Field(
+        ..., ge=60, le=250, description="Max heart rate achieved", example=150.0
+    )
+    exang: float = Field(
+        ..., ge=0, le=1, description="Exercise induced angina (1=Yes)", example=0.0
+    )
+    oldpeak: float = Field(
+        ..., ge=0.0, le=10.0, description="ST depression induced by exercise", example=1.5
+    )
+    slope: float = Field(
+        ..., ge=1, le=3, description="Slope of peak exercise ST (1-3)", example=2.0
+    )
+    ca: float = Field(
+        ..., ge=0, le=3, description="Number of major vessels (0-3)", example=0.0
+    )
+    thal: float = Field(
+        ...,
+        ge=3,
+        le=7,
+        description="Thalassemia (3=normal, 6=fixed defect, 7=reversable)",
+        example=3.0,
+    )
 
     class Config:
         schema_extra = {

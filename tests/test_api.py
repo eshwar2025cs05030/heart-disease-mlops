@@ -4,18 +4,16 @@ Heart Disease MLOps Assignment
 BITS Pilani MTech (AMLCSZG523)
 """
 
-import sys
 import os
-import pickle
+import sys
+
 import pytest
-import numpy as np
-from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
 from sklearn.datasets import make_classification
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 

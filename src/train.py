@@ -5,28 +5,34 @@ BITS Pilani MTech (AMLCSZG523)
 """
 
 import os
-import sys
 import pickle
+import sys
 import warnings
-import numpy as np
-import pandas as pd
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    roc_auc_score, classification_report, confusion_matrix, roc_curve
-)
-from sklearn.model_selection import StratifiedKFold, cross_val_score
+import matplotlib
+
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt  # noqa: E402
 import mlflow
 import mlflow.sklearn
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+    roc_curve,
+)
+from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 # Add src to path
 sys.path.insert(0, os.path.dirname(__file__))
-from data_preprocessing import load_raw_data, clean_data, preprocess_and_split, save_pipeline
+from data_preprocessing import clean_data, load_raw_data, preprocess_and_split, save_pipeline  # noqa: E402
 
 warnings.filterwarnings("ignore")
 
@@ -97,8 +103,7 @@ def evaluate_model(model, X_test, y_test, model_name: str, plots_dir: str):
     return metrics, cm_path, roc_path
 
 
-def train_and_log(model, model_name: str, params: dict,
-                  X_train, X_test, y_train, y_test, pipeline):
+def train_and_log(model, model_name: str, params: dict, X_train, X_test, y_train, y_test, pipeline):
     """Train a model and log everything to MLflow."""
     os.makedirs(MODEL_DIR, exist_ok=True)
     plots_dir = os.path.join(REPORTS_DIR, "model_plots")
@@ -133,8 +138,11 @@ def train_and_log(model, model_name: str, params: dict,
         mlflow.log_artifact(roc_path, artifact_path="plots")
 
         # Log model
-        mlflow.sklearn.log_model(model, artifact_path="model",
-                                 registered_model_name=model_name.replace(" ", "_"))
+        mlflow.sklearn.log_model(
+            model,
+            artifact_path="model",
+            registered_model_name=model_name.replace(" ", "_"),
+        )
 
         # Save model locally
         model_path = os.path.join(MODEL_DIR, f"{model_name.lower().replace(' ', '_')}.pkl")
@@ -201,8 +209,8 @@ def main():
     # --- Select best model ---
     best_model_name = max(results, key=lambda m: results[m]["metrics"]["roc_auc"])
     best_model = lr_model if best_model_name == "Logistic Regression" else rf_model
-    print(f"\nBest model: {best_model_name} "
-          f"(ROC-AUC={results[best_model_name]['metrics']['roc_auc']:.4f})")
+    auc = results[best_model_name]["metrics"]["roc_auc"]
+    print(f"\nBest model: {best_model_name} (ROC-AUC={auc:.4f})")
 
     # Save best model as 'best_model.pkl'
     best_path = os.path.join(MODEL_DIR, "best_model.pkl")

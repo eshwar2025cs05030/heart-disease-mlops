@@ -4,19 +4,23 @@ Heart Disease MLOps Assignment
 BITS Pilani MTech (AMLCSZG523)
 """
 
-import sys
 import os
-import pytest
 import pickle
+import sys
+
 import numpy as np
+import pytest
+from sklearn.datasets import make_classification
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.datasets import make_classification
-from data_preprocessing import (
-    load_raw_data, clean_data, preprocess_and_split, build_preprocessing_pipeline
+from data_preprocessing import (  # noqa: E402
+    build_preprocessing_pipeline,
+    clean_data,
+    load_raw_data,
+    preprocess_and_split,
 )
 
 RAW_DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "raw", "heart_disease.csv")

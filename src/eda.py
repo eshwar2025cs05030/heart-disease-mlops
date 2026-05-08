@@ -4,15 +4,18 @@ Heart Disease UCI Dataset - MLOps Assignment
 BITS Pilani MTech (AMLCSZG523)
 """
 
-import pandas as pd
-import numpy as np
-import matplotlib
-matplotlib.use("Agg")  # Non-interactive backend for CI/CD environments
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
 
-from data_preprocessing import load_raw_data, clean_data, COLUMN_NAMES
+import matplotlib
+
+matplotlib.use("Agg")  # Non-interactive backend for CI/CD environments
+
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+from data_preprocessing import COLUMN_NAMES, clean_data, load_raw_data
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "reports", "eda_plots")
 

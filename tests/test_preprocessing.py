@@ -4,11 +4,12 @@ Heart Disease MLOps Assignment
 BITS Pilani MTech (AMLCSZG523)
 """
 
-import sys
 import os
-import pytest
+import sys
+
 import numpy as np
 import pandas as pd
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
