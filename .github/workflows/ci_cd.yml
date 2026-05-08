@@ -1,0 +1,217 @@
+# ============================================================
+# GitHub Actions CI/CD Pipeline
+# Heart Disease MLOps Assignment — BITS Pilani MTech (AMLCSZG523)
+# ============================================================
+#
+# Triggers: push/PR to main or develop
+# Steps: lint → unit tests → model training → Docker build
+# ============================================================
+
+name: MLOps CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: "3.10"
+  IMAGE_NAME: heart-disease-api
+
+jobs:
+
+  # ===========================================================
+  # JOB 1: Lint
+  # ===========================================================
+  lint:
+    name: "Code Quality — Lint"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install lint tools
+        run: |
+          pip install --upgrade pip
+          pip install flake8 black isort
+
+      - name: Run flake8 (PEP8 style check)
+        run: |
+          flake8 src/ tests/ \
+            --max-line-length=100 \
+            --ignore=E203,W503 \
+            --statistics
+
+      - name: Check black formatting
+        run: |
+          black --check --diff --line-length=100 src/ tests/
+
+      - name: Check import ordering (isort)
+        run: |
+          isort --check-only --diff src/ tests/
+
+  # ===========================================================
+  # JOB 2: Unit Tests
+  # ===========================================================
+  test:
+    name: "Unit Tests — Pytest"
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov httpx
+
+      - name: Run unit tests with coverage
+        run: |
+          pytest tests/ \
+            --cov=src \
+            --cov-report=xml:reports/coverage.xml \
+            --cov-report=term-missing \
+            --junitxml=reports/test_results.xml \
+            -v
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: reports/coverage.xml
+          retention-days: 7
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: reports/test_results.xml
+          retention-days: 7
+
+  # ===========================================================
+  # JOB 3: Model Training
+  # ===========================================================
+  train:
+    name: "Model Training — MLflow"
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Preprocess data
+        run: |
+          python src/data_preprocessing.py
+
+      - name: Run EDA
+        run: |
+          cd src && python eda.py
+
+      - name: Train models with MLflow tracking
+        run: |
+          cd src && python train.py
+
+      - name: Upload trained models
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-models
+          path: models/
+          retention-days: 30
+
+      - name: Upload MLflow runs
+        uses: actions/upload-artifact@v4
+        with:
+          name: mlflow-runs
+          path: mlruns/
+          retention-days: 7
+
+      - name: Upload EDA plots
+        uses: actions/upload-artifact@v4
+        with:
+          name: eda-reports
+          path: reports/
+          retention-days: 7
+
+  # ===========================================================
+  # JOB 4: Docker Build
+  # ===========================================================
+  docker:
+    name: "Docker — Build & Test"
+    runs-on: ubuntu-latest
+    needs: train
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download trained models
+        uses: actions/download-artifact@v4
+        with:
+          name: trained-models
+          path: models/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker tag ${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.IMAGE_NAME }}:latest
+
+      - name: Test Docker container
+        run: |
+          docker run -d --name test_container \
+            -p 8000:8000 \
+            ${{ env.IMAGE_NAME }}:latest
+          sleep 10
+          curl -f http://localhost:8000/health || exit 1
+          curl -f -X POST http://localhost:8000/predict \
+            -H "Content-Type: application/json" \
+            -d '{"age":54,"sex":1,"cp":2,"trestbps":130,"chol":250,"fbs":0,"restecg":0,"thalach":150,"exang":0,"oldpeak":1.5,"slope":2,"ca":0,"thal":3}' \
+            | python -c "import sys,json; d=json.load(sys.stdin); assert 'prediction' in d; print('Docker test PASSED')"
+          docker stop test_container
+
+      - name: Login to Docker Hub (on push to main)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push to Docker Hub (on push to main)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          docker tag ${{ env.IMAGE_NAME }}:latest \
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest

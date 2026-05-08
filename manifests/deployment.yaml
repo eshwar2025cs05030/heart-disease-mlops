@@ -1,0 +1,116 @@
+# ============================================================
+# Kubernetes Deployment Manifest
+# Heart Disease Prediction API
+# MLOps Assignment — BITS Pilani MTech (AMLCSZG523)
+# ============================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heart-disease-api
+  namespace: default
+  labels:
+    app: heart-disease-api
+    version: "1.0.0"
+    assignment: mlops-amlcszg523
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: heart-disease-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: heart-disease-api
+        version: "1.0.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+        - name: heart-disease-api
+          image: heart-disease-api:latest    # Replace with your Docker Hub image
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: MODEL_PATH
+              value: "/app/models/best_model.pkl"
+            - name: PIPELINE_PATH
+              value: "/app/models/preprocessing_pipeline.pkl"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+      restartPolicy: Always
+
+---
+# ============================================================
+# Kubernetes Service (LoadBalancer)
+# ============================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: heart-disease-api-service
+  namespace: default
+  labels:
+    app: heart-disease-api
+spec:
+  type: LoadBalancer       # Use NodePort for Minikube
+  selector:
+    app: heart-disease-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8000
+
+---
+# ============================================================
+# Horizontal Pod Autoscaler
+# ============================================================
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: heart-disease-api-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: heart-disease-api
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
