@@ -32,7 +32,7 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 # Add src to path
 sys.path.insert(0, os.path.dirname(__file__))
-from data_preprocessing import clean_data, load_raw_data, preprocess_and_split, save_pipeline
+from data_preprocessing import clean_data, load_raw_data, preprocess_and_split, save_pipeline  # noqa: E402
 
 warnings.filterwarnings("ignore")
 
@@ -78,9 +78,7 @@ def evaluate_model(model, X_test, y_test, model_name: str, plots_dir: str):
                     color="white" if cm[i, j] > thresh else "black",
                     fontsize=14, fontweight="bold")
     plt.tight_layout()
-def train_and_log(
-    model, model_name: str, params: dict, X_train, X_test, y_train, y_test, pipeline
-):
+    cm_path = os.path.join(plots_dir, f"{model_name.lower().replace(' ', '_')}_confusion_matrix.png")
     plt.savefig(cm_path, dpi=150, bbox_inches="tight")
     plt.close()
 
@@ -105,9 +103,7 @@ def train_and_log(
     return metrics, cm_path, roc_path
 
 
-def train_and_log(
-    model, model_name: str, params: dict, X_train, X_test, y_train, y_test, pipeline
-):
+def train_and_log(model, model_name: str, params: dict, X_train, X_test, y_train, y_test, pipeline):
     """Train a model and log everything to MLflow."""
     os.makedirs(MODEL_DIR, exist_ok=True)
     plots_dir = os.path.join(REPORTS_DIR, "model_plots")
