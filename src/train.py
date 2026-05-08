@@ -32,7 +32,7 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 # Add src to path
 sys.path.insert(0, os.path.dirname(__file__))
-from data_preprocessing import clean_data, load_raw_data, preprocess_and_split, save_pipeline  # noqa: E402
+from data_preprocessing import clean_data, load_raw_data, preprocess_and_split, save_pipeline
 
 warnings.filterwarnings("ignore")
 
