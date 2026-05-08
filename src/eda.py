@@ -73,6 +73,7 @@ def plot_feature_histograms(df: pd.DataFrame, save_dir: str):
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(20, n_rows * 4))
     axes = axes.flatten()
 
+    palette = {0: "#2ecc71", 1: "#e74c3c"}
     for i, col in enumerate(feature_cols):
         for target_val, color in palette.items():
             subset = df[df["target"] == target_val][col].dropna()
