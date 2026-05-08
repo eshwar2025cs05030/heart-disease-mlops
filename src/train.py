@@ -103,7 +103,9 @@ def evaluate_model(model, X_test, y_test, model_name: str, plots_dir: str):
     return metrics, cm_path, roc_path
 
 
-def train_and_log(model, model_name: str, params: dict, X_train, X_test, y_train, y_test, pipeline):
+def train_and_log(
+    model, model_name: str, params: dict, X_train, X_test, y_train, y_test, pipeline
+):
     """Train a model and log everything to MLflow."""
     os.makedirs(MODEL_DIR, exist_ok=True)
     plots_dir = os.path.join(REPORTS_DIR, "model_plots")

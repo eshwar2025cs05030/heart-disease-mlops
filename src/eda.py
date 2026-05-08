@@ -73,7 +73,6 @@ def plot_feature_histograms(df: pd.DataFrame, save_dir: str):
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(20, n_rows * 4))
     axes = axes.flatten()
 
-    palette = {0: "#2ecc71", 1: "#e74c3c"}
     for i, col in enumerate(feature_cols):
         for target_val, color in palette.items():
             subset = df[df["target"] == target_val][col].dropna()
@@ -121,7 +120,6 @@ def plot_boxplots(df: pd.DataFrame, save_dir: str):
     """Boxplots of continuous features grouped by target."""
     continuous_cols = ["age", "trestbps", "chol", "thalach", "oldpeak"]
     fig, axes = plt.subplots(1, len(continuous_cols), figsize=(20, 6))
-    palette = {0: "#2ecc71", 1: "#e74c3c"}
 
     for i, col in enumerate(continuous_cols):
         data_by_class = [

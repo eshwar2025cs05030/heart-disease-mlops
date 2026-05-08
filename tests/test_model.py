@@ -17,7 +17,6 @@ from sklearn.linear_model import LogisticRegression
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from data_preprocessing import (  # noqa: E402
-    build_preprocessing_pipeline,
     clean_data,
     load_raw_data,
     preprocess_and_split,
