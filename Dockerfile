@@ -42,6 +42,9 @@ RUN useradd -m -u 1000 appuser && \
 USER appuser
 
 # Expose API port
+ENV MODEL_PATH=/app/models/best_model.pkl
+ENV PIPELINE_PATH=/app/models/preprocessing_pipeline.pkl
+
 EXPOSE 8000
 
 # Health check
