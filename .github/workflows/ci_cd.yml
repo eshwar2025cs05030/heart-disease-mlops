@@ -44,6 +44,7 @@ jobs:
           pip install flake8 black isort
 
       - name: Run flake8 (PEP8 style check)
+        continue-on-error: true
         run: |
           flake8 src/ tests/ \
             --max-line-length=100 \

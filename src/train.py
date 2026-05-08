@@ -78,7 +78,9 @@ def evaluate_model(model, X_test, y_test, model_name: str, plots_dir: str):
                     color="white" if cm[i, j] > thresh else "black",
                     fontsize=14, fontweight="bold")
     plt.tight_layout()
-    cm_path = os.path.join(plots_dir, f"{model_name.lower().replace(' ', '_')}_confusion_matrix.png")
+def train_and_log(
+    model, model_name: str, params: dict, X_train, X_test, y_train, y_test, pipeline
+):
     plt.savefig(cm_path, dpi=150, bbox_inches="tight")
     plt.close()
 
