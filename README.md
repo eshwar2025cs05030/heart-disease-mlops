@@ -5,6 +5,14 @@
 
 ---
 
+## API Access
+
+> **Deployed URL:** This API runs locally via Docker or Kubernetes (no public cloud deployment).
+> Follow the [Quick Start](#quick-start-local-setup) or [Docker](#docker) instructions below to run it on your machine.
+> The API will be available at `http://localhost:8000` with interactive docs at `http://localhost:8000/docs`.
+
+---
+
 ## Overview
 
 End-to-end MLOps pipeline that predicts heart disease risk using the UCI Heart Disease dataset. The project covers data preprocessing, EDA, model training with experiment tracking, REST API serving, containerization, CI/CD, and Kubernetes deployment.
