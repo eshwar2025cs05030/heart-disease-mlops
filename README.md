@@ -5,6 +5,14 @@
 
 ---
 
+## Demo Video
+
+▶️ [Watch the End-to-End MLOps Pipeline Demo](https://drive.google.com/file/d/1Ut6gkbEGn1KCfbej9-SGe1GyjORQS4rt/view?usp=drive_link)
+
+The demo covers: GitHub CI/CD pipeline, FastAPI prediction, MLflow experiment tracking, Docker containerization, and Kubernetes deployment.
+
+---
+
 ## API Access
 
 > **Deployed URL:** This API runs locally via Docker or Kubernetes (no public cloud deployment).
